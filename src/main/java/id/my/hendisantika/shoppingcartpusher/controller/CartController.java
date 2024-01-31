@@ -6,6 +6,7 @@ import id.my.hendisantika.shoppingcartpusher.constants.PusherConstants;
 import id.my.hendisantika.shoppingcartpusher.controller.vo.ItemRequest;
 import id.my.hendisantika.shoppingcartpusher.model.Product;
 import jakarta.annotation.PostConstruct;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -158,6 +159,20 @@ public class CartController {
                 pusher.trigger(PusherConstants.CHANNEL_NAME, "itemRemoved", product);
             }
         }
+
+        return "OK";
+    }
+
+    /**
+     * Method that empties the shopping cart
+     *
+     * @param model Object from Spring MVC
+     * @return Status string
+     */
+    @DeleteMapping(value = "/cart")
+    public String emptyCart(Model model) {
+        model.addAttribute(GeneralConstants.ID_SESSION_SHOPPING_CART, new ArrayList<Product>());
+        pusher.trigger(PusherConstants.CHANNEL_NAME, "cartEmptied", "");
 
         return "OK";
     }
