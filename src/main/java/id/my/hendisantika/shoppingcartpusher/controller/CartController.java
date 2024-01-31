@@ -19,6 +19,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Created by IntelliJ IDEA.
@@ -177,4 +178,16 @@ public class CartController {
         return "OK";
     }
 
+    /**
+     * Gets a product by its id from a stream
+     *
+     * @param stream That contains the product to get
+     * @param id     Of the product to get
+     * @return The product wrapped in an Optional object
+     */
+    private Optional<Product> getProductById(Stream<Product> stream, Long id) {
+        return stream
+                .filter(product -> product.getId().equals(id))
+                .findFirst();
+    }
 }
