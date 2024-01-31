@@ -5,6 +5,7 @@ import id.my.hendisantika.shoppingcartpusher.constants.GeneralConstants;
 import id.my.hendisantika.shoppingcartpusher.constants.PusherConstants;
 import id.my.hendisantika.shoppingcartpusher.model.Product;
 import jakarta.annotation.PostConstruct;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
@@ -68,5 +69,16 @@ public class CartController {
         product.setName("External Hard Drive");
         product.setPrice(new BigDecimal("89.99"));
         products.add(product);
+    }
+
+    /**
+     * Method that returns the products available for shopping
+     *
+     * @return List of product objects
+     */
+    @GetMapping(value = "/products",
+            produces = "application/json")
+    public List<Product> getProducts() {
+        return products;
     }
 }
