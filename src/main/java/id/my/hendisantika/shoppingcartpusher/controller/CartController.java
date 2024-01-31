@@ -3,9 +3,12 @@ package id.my.hendisantika.shoppingcartpusher.controller;
 import com.pusher.rest.Pusher;
 import id.my.hendisantika.shoppingcartpusher.constants.GeneralConstants;
 import id.my.hendisantika.shoppingcartpusher.constants.PusherConstants;
+import id.my.hendisantika.shoppingcartpusher.controller.vo.ItemRequest;
 import id.my.hendisantika.shoppingcartpusher.model.Product;
 import jakarta.annotation.PostConstruct;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
@@ -13,6 +16,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by IntelliJ IDEA.
@@ -94,4 +98,42 @@ public class CartController {
     public List<Product> getCartItems(@SessionAttribute(GeneralConstants.ID_SESSION_SHOPPING_CART) List<Product> shoppingCart) {
         return shoppingCart;
     }
+
+    /**
+     * Method to add a product to the shopping cart
+     *
+     * @param request      Request object
+     * @param shoppingCart List of products injected by Spring MVC from the session
+     * @return Status string
+     */
+    @PostMapping(value = "/cart/item", consumes = "application/json")
+    public String addItem(@RequestBody ItemRequest request, @SessionAttribute(GeneralConstants.ID_SESSION_SHOPPING_CART) List<Product> shoppingCart) {
+        Product newProduct = new Product();
+        Optional<Product> optional = getProductById(products.stream(), request.getId());
+
+        if (optional.isPresent()) {
+            Product product = optional.get();
+
+            newProduct.setId(product.getId());
+            newProduct.setName(product.getName());
+            newProduct.setPrice(product.getPrice());
+            newProduct.setQuantity(request.getQuantity());
+
+            Optional<Product> productInCart = getProductById(shoppingCart.stream(), product.getId());
+            String event;
+
+            if (productInCart.isPresent()) {
+                productInCart.get().setQuantity(request.getQuantity());
+                event = "itemUpdated";
+            } else {
+                shoppingCart.add(newProduct);
+                event = "itemAdded";
+            }
+
+            pusher.trigger(PusherConstants.CHANNEL_NAME, event, newProduct);
+        }
+
+        return "OK";
+    }
+
 }
