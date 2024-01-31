@@ -7,6 +7,7 @@ import id.my.hendisantika.shoppingcartpusher.model.Product;
 import jakarta.annotation.PostConstruct;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.SessionAttribute;
 import org.springframework.web.bind.annotation.SessionAttributes;
 
 import java.math.BigDecimal;
@@ -80,5 +81,17 @@ public class CartController {
             produces = "application/json")
     public List<Product> getProducts() {
         return products;
+    }
+
+    /**
+     * Method that returns the list of products in the current shopping cart
+     *
+     * @param shoppingCart List of products injected by Spring MVC from the session
+     * @return List of products
+     */
+    @GetMapping(value = "/cart/items",
+            produces = "application/json")
+    public List<Product> getCartItems(@SessionAttribute(GeneralConstants.ID_SESSION_SHOPPING_CART) List<Product> shoppingCart) {
+        return shoppingCart;
     }
 }
