@@ -6,6 +6,7 @@ import id.my.hendisantika.shoppingcartpusher.constants.PusherConstants;
 import id.my.hendisantika.shoppingcartpusher.controller.vo.ItemRequest;
 import id.my.hendisantika.shoppingcartpusher.model.Product;
 import jakarta.annotation.PostConstruct;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -131,6 +132,31 @@ public class CartController {
             }
 
             pusher.trigger(PusherConstants.CHANNEL_NAME, event, newProduct);
+        }
+
+        return "OK";
+    }
+
+    /**
+     * Method that deletes an item from the cart
+     *
+     * @param request      Request object
+     * @param shoppingCart List of products injected by Spring MVC from the session
+     * @return Status string
+     */
+    @DeleteMapping(value = "/cart/item", consumes = "application/json")
+    public String deleteItem(@RequestBody ItemRequest request, @SessionAttribute(GeneralConstants.ID_SESSION_SHOPPING_CART) List<Product> shoppingCart) {
+        Optional<Product> optional = getProductById(products.stream(), request.getId());
+
+        if (optional.isPresent()) {
+            Product product = optional.get();
+
+            Optional<Product> productInCart = getProductById(shoppingCart.stream(), product.getId());
+
+            if (productInCart.isPresent()) {
+                shoppingCart.remove(productInCart.get());
+                pusher.trigger(PusherConstants.CHANNEL_NAME, "itemRemoved", product);
+            }
         }
 
         return "OK";
